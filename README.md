@@ -84,27 +84,3 @@ infra/init.sql database schema
 docs/          architecture notes (Portuguese) and roadmap
 ```
 
-## Running locally
-
-Requirements: Node 20+, pnpm 9, Docker.
-
-```bash
-cp .env.example .env                   # set ENCRYPTION_KEY and API_KEY
-cp packages/dashboard/.env.local.example packages/dashboard/.env.local
-docker compose up -d                   # Postgres + Redis
-pnpm install
-pnpm --filter @rpa/runner exec playwright install chromium
-pnpm dev                               # API :3000, dashboard :3001, runner
-```
-
-To load the extension, run `pnpm --filter @rpa/extension build` and load `packages/extension/dist` as an unpacked extension in `chrome://extensions`.
-
-For production, fill in the production section of `.env` and run `docker compose -f docker-compose.prod.yml up -d --build`.
-
-## Status
-
-The core, the extension and the dashboard work, and the service ran in production. See [docs/ROADMAP.md](docs/ROADMAP.md) for what is next. There are no automated tests yet; that's the first item on the roadmap.
-
-## Screenshots
-
-<!-- TODO: add docs/img/editor.png (recipe editor with an example.com recipe), docs/img/executions.png and docs/img/extension.png -->
