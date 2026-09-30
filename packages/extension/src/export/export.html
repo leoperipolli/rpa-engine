@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RPA Recorder — Exportar Receita</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      color: #1a1a1a;
+      background: #f5f5f5;
+      padding: 32px 16px 64px;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: #111;
+    }
+
+    .section {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #6b7280;
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 4px;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    input[type="password"],
+    input[type="number"] {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #111;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input:focus { border-color: #3b82f6; }
+    input.error { border-color: #ef4444; }
+
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .error-msg {
+      font-size: 12px;
+      color: #ef4444;
+      margin-top: 3px;
+    }
+
+    /* Steps list */
+    #steps-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .step {
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 12px;
+      background: #fafafa;
+    }
+
+    .step-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .step-index {
+      font-size: 11px;
+      color: #9ca3af;
+      font-weight: 600;
+      min-width: 20px;
+      padding-top: 2px;
+    }
+
+    .step-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .badge-navigate { background: #f3f4f6; color: #6b7280; }
+    .badge-click    { background: #dbeafe; color: #1d4ed8; }
+    .badge-fill     { background: #dcfce7; color: #15803d; }
+    .badge-select   { background: #ede9fe; color: #6d28d9; }
+    .badge-extract  { background: #ffedd5; color: #c2410c; }
+
+    .extract-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: #ffedd5;
+      color: #c2410c;
+      vertical-align: middle;
+    }
+
+    .step-content {
+      flex: 1;
+      font-size: 12px;
+      color: #374151;
+      word-break: break-all;
+    }
+
+    .step-content .selector {
+      font-family: monospace;
+      font-size: 11px;
+      color: #6b7280;
+    }
+
+    .step-content .value {
+      font-weight: 500;
+      color: #111;
+    }
+
+    .step-controls {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 400;
+      cursor: pointer;
+      margin-bottom: 0;
+    }
+
+    .var-name-field { display: none; }
+    .var-name-field.visible { display: block; }
+
+    .var-name-field input {
+      padding: 5px 8px;
+      font-size: 12px;
+    }
+
+    /* Session */
+    .session-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 14px;
+    }
+
+    #session-fields { display: none; }
+    #session-fields.visible { display: block; }
+
+    .session-range {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+
+    .session-range input {
+      width: 70px;
+    }
+
+    /* Feedback */
+    #feedback {
+      display: none;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    #feedback.success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; display: block; }
+    #feedback.error   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; display: block; }
+
+    /* Buttons */
+    .actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    button:hover { opacity: 0.88; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #btn-download { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+    #btn-send     { background: #3b82f6; color: #fff; }
+
+    .empty-state {
+      text-align: center;
+      color: #9ca3af;
+      padding: 32px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>RPA Recorder — Exportar Receita</h1>
+
+    <!-- Feedback -->
+    <div id="feedback"></div>
+
+    <!-- Recipe metadata -->
+    <div class="section">
+      <div class="section-title">Informações da Receita</div>
+      <div class="field">
+        <label for="recipe-name">Nome <span style="color:#ef4444">*</span></label>
+        <input type="text" id="recipe-name" placeholder="Ex: Consultar rastreamento TMS1" />
+        <div class="error-msg" id="err-name"></div>
+      </div>
+      <div class="field">
+        <label for="recipe-desc">Descrição <span style="color:#9ca3af">(opcional)</span></label>
+        <input type="text" id="recipe-desc" placeholder="O que essa receita faz?" />
+      </div>
+    </div>
+
+    <!-- Steps -->
+    <div class="section">
+      <div class="section-title">Steps gravados</div>
+      <div id="steps-list">
+        <div class="empty-state">Nenhum step gravado.</div>
+      </div>
+    </div>
+
+    <!-- Session -->
+    <div class="section">
+      <label class="session-toggle">
+        <input type="checkbox" id="session-enable" />
+        Configurar sessão de login
+      </label>
+      <div id="session-fields">
+        <div class="session-range">
+          <span>Steps de login: do</span>
+          <input type="number" id="session-from" min="1" value="1" />
+          <span>ao</span>
+          <input type="number" id="session-to" min="1" value="1" />
+        </div>
+        <div class="field">
+          <label for="session-selector">Seletor CSS quando logado <span style="color:#ef4444">*</span></label>
+          <input type="text" id="session-selector" placeholder="Ex: .user-avatar, #dashboard" />
+          <div class="error-msg" id="err-session"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button id="btn-download">Copiar JSON</button>
+    </div>
+  </div>
+
+  <script src="export.js" type="module"></script>
+</body>
+</html>

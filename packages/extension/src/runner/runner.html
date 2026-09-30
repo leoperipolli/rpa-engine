@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RPA Recorder — Executar via API</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      color: #1a1a1a;
+      background: #f5f5f5;
+      padding: 32px 16px 64px;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: #111;
+    }
+
+    .section {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #6b7280;
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 4px;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    input[type="password"] {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #111;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input:focus { border-color: #3b82f6; }
+    input.error { border-color: #ef4444; }
+    input[readonly] { background: #f9fafb; cursor: default; color: #374151; }
+
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .error-msg {
+      font-size: 12px;
+      color: #ef4444;
+      margin-top: 3px;
+    }
+
+    /* Connect row */
+    .connect-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .connect-row .field { flex: 1; margin-bottom: 0; }
+
+    /* Buttons */
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+    }
+
+    button:hover { opacity: 0.88; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #btn-connect { background: #3b82f6; color: #fff; height: 36px; }
+
+    .btn-copy {
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      font-size: 12px;
+      padding: 5px 12px;
+      height: 32px;
+    }
+
+    /* Feedback */
+    #feedback {
+      display: none;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    #feedback.success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; display: block; }
+    #feedback.error   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; display: block; }
+
+    /* Recipes list */
+    #recipes-section { display: none; }
+    #recipes-section.visible { display: block; }
+
+    .empty-state {
+      text-align: center;
+      color: #9ca3af;
+      padding: 24px;
+      font-size: 13px;
+    }
+
+    .recipe-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      margin-bottom: 8px;
+    }
+
+    .recipe-card:last-child { margin-bottom: 0; }
+
+    .recipe-card:hover { border-color: #3b82f6; background: #eff6ff; }
+    .recipe-card.selected { border-color: #3b82f6; background: #eff6ff; }
+
+    .recipe-name {
+      font-weight: 600;
+      font-size: 13px;
+      color: #111;
+      margin-bottom: 2px;
+    }
+
+    .recipe-meta {
+      font-size: 11px;
+      color: #6b7280;
+    }
+
+    /* Config section */
+    #config-section { display: none; }
+    #config-section.visible { display: block; }
+
+    .copy-field {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .copy-field:last-child { margin-bottom: 0; }
+
+    .copy-field input { flex: 1; }
+
+    /* Inputs list */
+    .inputs-list {
+      margin-top: 10px;
+    }
+
+    .input-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin: 3px 3px 3px 0;
+    }
+
+    .input-tag.optional {
+      background: #f9fafb;
+      border-color: #e5e7eb;
+      color: #6b7280;
+    }
+
+    .copy-toast {
+      font-size: 11px;
+      color: #15803d;
+      margin-left: 4px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .copy-toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>RPA Recorder — Executar via API</h1>
+
+    <div id="feedback"></div>
+
+    <!-- Conexão -->
+    <div class="section">
+      <div class="section-title">Conexão com o backend</div>
+      <div class="field-row" style="margin-bottom:12px">
+        <div class="field">
+          <label for="runner-url">URL do backend</label>
+          <input type="url" id="runner-url" placeholder="http://localhost:3000" />
+        </div>
+        <div class="field">
+          <label for="runner-key">API Key</label>
+          <input type="password" id="runner-key" placeholder="sk-..." />
+        </div>
+      </div>
+      <button id="btn-connect">Conectar</button>
+    </div>
+
+    <!-- Receitas -->
+    <div class="section" id="recipes-section">
+      <div class="section-title">Receitas disponíveis</div>
+      <div id="recipes-list">
+        <div class="empty-state">Nenhuma receita encontrada.</div>
+      </div>
+    </div>
+
+    <!-- Configuração gerada -->
+    <div class="section" id="config-section">
+      <div class="section-title">Configuração para o n8n</div>
+
+      <div class="field" style="margin-bottom:16px">
+        <label>Endpoint (URL)</label>
+        <div class="copy-field">
+          <input type="text" id="cfg-url" readonly />
+          <button class="btn-copy" data-target="cfg-url">Copiar</button>
+          <span class="copy-toast" id="toast-cfg-url">Copiado!</span>
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:16px">
+        <label>Recipe ID</label>
+        <div class="copy-field">
+          <input type="text" id="cfg-recipe-id" readonly />
+          <button class="btn-copy" data-target="cfg-recipe-id">Copiar</button>
+          <span class="copy-toast" id="toast-cfg-recipe-id">Copiado!</span>
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:16px">
+        <label>API Key (para o header <code style="font-size:11px;background:#f3f4f6;padding:1px 4px;border-radius:3px">X-API-Key</code>)</label>
+        <div class="copy-field">
+          <input type="password" id="cfg-api-key" readonly />
+          <button class="btn-copy" data-target="cfg-api-key">Copiar</button>
+          <span class="copy-toast" id="toast-cfg-api-key">Copiado!</span>
+        </div>
+      </div>
+
+      <div id="inputs-section" style="display:none">
+        <label style="margin-bottom:6px">Inputs da receita (body → inputs)</label>
+        <div class="inputs-list" id="inputs-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="runner.js" type="module"></script>
+</body>
+</html>
