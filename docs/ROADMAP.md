@@ -18,7 +18,7 @@
 
 **Production use**
 - Dockerfiles for backend, runner and dashboard, plus a production compose file behind Caddy
-- Used as the extraction layer for carrier portals in the [logistics-sync](https://github.com/leopp18/logistics-sync) pipeline
+- Used as the extraction layer for carrier portals in the [logistics-sync](https://github.com/leoperipolli/logistics-sync) pipeline
 
 ## Next
 

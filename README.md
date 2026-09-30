@@ -2,7 +2,7 @@
 
 A self-hosted browser automation service. You record a flow in Chrome, tune it in a visual editor, and call it through an HTTP API. A Playwright worker runs it and returns the extracted data or the downloaded file.
 
-I built it to pull reports from web portals that have no API, for a logistics data pipeline ([logistics-sync](https://github.com/leopp18/logistics-sync)). It also replaced a set of hand-written scrapers with recipes that can be edited without redeploying code.
+I built it to pull reports from web portals that have no API, for a logistics data pipeline ([logistics-sync](https://github.com/leoperipolli/logistics-sync)). It also replaced a set of hand-written scrapers with recipes that can be edited without redeploying code.
 
 > **Note:** sanitized copy of a project I built and ran at work. Real recipes, target sites, credentials and deployment details are not included. Some UI text is in Portuguese.
 
